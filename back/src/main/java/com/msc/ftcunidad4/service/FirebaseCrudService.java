@@ -34,7 +34,6 @@ public class FirebaseCrudService {
         for (DocumentSnapshot document : future.get().getDocuments()) {
             Item item = document.toObject(Item.class);
             if (item != null) {
-                item.setId(document.getId());
                 items.add(item);
             }
         }
@@ -52,16 +51,11 @@ public class FirebaseCrudService {
         if (item == null) {
             return Optional.empty();
         }
-        item.setId(snapshot.getId());
         return Optional.of(item);
     }
 
     public Item create(Item item) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = item.getId() == null || item.getId().isBlank()
-                ? firestore.collection(collectionName).document()
-                : firestore.collection(collectionName).document(item.getId());
-
-        item.setId(docRef.getId());
+        DocumentReference docRef = firestore.collection(collectionName).document();
         docRef.set(item).get();
         return item;
     }
@@ -73,7 +67,6 @@ public class FirebaseCrudService {
             return Optional.empty();
         }
 
-        item.setId(id);
         docRef.set(item).get();
         return Optional.of(item);
     }
