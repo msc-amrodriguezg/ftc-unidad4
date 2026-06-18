@@ -55,7 +55,7 @@ public class FirebaseCrudService {
     }
 
     public Item create(Item item) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = firestore.collection(collectionName).document();
+        DocumentReference docRef = firestore.collection(collectionName).document(item.getId());
         docRef.set(item).get();
         return item;
     }
