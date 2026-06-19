@@ -24,14 +24,20 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
+      - name: Write Firebase service account file
+        run: |
+          mkdir -p back/src/main/resources/firebase
+          echo '${{ secrets.FIREBASE_CREDENTIALS }}' > back/src/main/resources/firebase/service-account.json
+
       - name: Build with Maven
+        working-directory: back
         run: mvn clean install
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          path: '${{ github.workspace }}/back/target/*.jar'
 
   deploy:
     runs-on: ubuntu-latest
