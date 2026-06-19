@@ -3,6 +3,8 @@ import Spinner from './components/Spinner';
 import ItemTable from './components/ItemTable';
 import ItemModal from './components/ItemModal';
 
+const API_URL = import.meta.env.VITE_API_URL ?? '';
+
 function App() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ function App() {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/items/loadFile', {
+      const response = await fetch(`${API_URL}/api/items/loadFile`, {
         method: 'POST',
         body: formData,
       });
@@ -75,7 +77,7 @@ function App() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/items');
+      const response = await fetch(`${API_URL}/api/items`);
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
@@ -120,7 +122,7 @@ function App() {
     setConfirmDeleteId(null);
     setLoading(true);
     try {
-      const response = await fetch(`/api/items/${id}`, {
+      const response = await fetch(`${API_URL}/api/items/${id}`, {
         method: 'DELETE',
       });
       
@@ -145,7 +147,7 @@ function App() {
     setLoading(true);
     
     const isEdit = modalMode === 'edit';
-    const url = isEdit ? `/api/items/${formData.id}` : '/api/items';
+    const url = isEdit ? `${API_URL}/api/items/${formData.id}` : `${API_URL}/api/items`;
     const method = isEdit ? 'PUT' : 'POST';
 
     try {
