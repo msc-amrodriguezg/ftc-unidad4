@@ -256,6 +256,32 @@ body {
   background-color: rgba(46, 167, 214, 0.03);
 }
 
+.material-table tbody tr.selected-row {
+  background-color: rgba(46, 167, 214, 0.08);
+}
+
+.material-table th.checkbox-col,
+.material-table td.checkbox-col {
+  width: 48px;
+  padding: 1rem 0.75rem;
+  text-align: center;
+}
+
+.material-table input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  vertical-align: middle;
+  transition: var(--transition);
+}
+
+.material-table input[type="checkbox"]:hover {
+  transform: scale(1.08);
+}
+
 .actions-cell {
   display: flex;
   gap: 8px;

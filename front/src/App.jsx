@@ -16,6 +16,10 @@ function App() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [toasts, setToasts] = useState([]);
   
+  // Multiple selection state
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [confirmDeleteSelected, setConfirmDeleteSelected] = useState(false);
+  
   // Local search filter
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -83,6 +87,7 @@ function App() {
       }
       const data = await response.json();
       setItems(data);
+      setSelectedIds([]);
     } catch (error) {
       console.error('Error fetching items:', error);
       showToast('Error al consultar la información del servidor.', 'danger');
@@ -130,12 +135,92 @@ function App() {
         showToast('Estudiante eliminado con éxito.', 'success');
         // Update local state instead of full reload to prevent flicker
         setItems((prev) => prev.filter((item) => item.id !== id));
+        setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
       } else {
         throw new Error('No se pudo eliminar el estudiante.');
       }
     } catch (error) {
       console.error('Error deleting item:', error);
       showToast('Error al intentar eliminar el estudiante.', 'danger');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Toggle selection for a single student
+  const handleToggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  // Toggle selection for all visible/filtered students
+  const handleToggleSelectAll = () => {
+    const visibleIds = filteredItems.map((item) => item.id);
+    const allVisibleSelected = visibleIds.every((id) => selectedIds.includes(id));
+
+    if (allVisibleSelected) {
+      // Deselect all visible students
+      setSelectedIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      // Select all visible students (merging with existing selection)
+      setSelectedIds((prev) => {
+        const newSelection = [...prev];
+        visibleIds.forEach((id) => {
+          if (!newSelection.includes(id)) {
+            newSelection.push(id);
+          }
+        });
+        return newSelection;
+      });
+    }
+  };
+
+  // Trigger delete selected confirmation
+  const handleDeleteSelectedTrigger = () => {
+    setConfirmDeleteSelected(true);
+  };
+
+  // Confirm delete selected students
+  const handleDeleteSelectedConfirm = async () => {
+    setConfirmDeleteSelected(false);
+    setLoading(true);
+    const idsToDelete = [...selectedIds];
+    
+    try {
+      const results = await Promise.all(
+        idsToDelete.map(async (id) => {
+          try {
+            const response = await fetch(`${API_URL}/api/items/${id}`, {
+              method: 'DELETE',
+            });
+            return { id, ok: response.ok || response.status === 204 || response.status === 200 };
+          } catch (err) {
+            console.error(`Error deleting student ${id}:`, err);
+            return { id, ok: false };
+          }
+        })
+      );
+
+      const successfulDeletes = results.filter((r) => r.ok).map((r) => r.id);
+      const failedDeletes = results.filter((r) => !r.ok).map((r) => r.id);
+
+      if (successfulDeletes.length > 0) {
+        setItems((prev) => prev.filter((item) => !successfulDeletes.includes(item.id)));
+        setSelectedIds((prev) => prev.filter((id) => !successfulDeletes.includes(id)));
+      }
+
+      if (failedDeletes.length > 0) {
+        showToast(
+          `Se eliminaron ${successfulDeletes.length} estudiantes, pero falló la eliminación de ${failedDeletes.length}.`,
+          'danger'
+        );
+      } else {
+        showToast(`Se eliminaron ${successfulDeletes.length} estudiantes con éxito.`, 'success');
+      }
+    } catch (error) {
+      console.error('Error in bulk delete:', error);
+      showToast('Error al intentar eliminar los estudiantes seleccionados.', 'danger');
     } finally {
       setLoading(false);
     }
@@ -244,8 +329,28 @@ function App() {
       {/* Main dashboard content */}
       <main className="container">
         <div className="dashboard-header">
-          <div className="dashboard-title">
+          <div className="dashboard-title" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <h2>Listado de Estudiantes</h2>
+            {selectedIds.length > 0 && (
+              <button 
+                className="btn btn-danger" 
+                onClick={handleDeleteSelectedTrigger}
+                style={{ 
+                  textTransform: 'none', 
+                  fontSize: '0.8rem', 
+                  padding: '0.4rem 0.8rem',
+                  animation: 'fadeIn 0.2s ease-out'
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                Eliminar seleccionados ({selectedIds.length})
+              </button>
+            )}
           </div>
           
           {/* Quick search input */}
@@ -292,6 +397,9 @@ function App() {
             items={filteredItems}
             onEdit={handleEditOpen}
             onDelete={handleDeleteTrigger}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+            onToggleSelectAll={handleToggleSelectAll}
           />
         </div>
       </main>
@@ -334,7 +442,28 @@ function App() {
         </div>
       )}
 
-      {/* Toast Notification Container */}
+      {/* Bulk Confirmation Dialog Modal */}
+      {confirmDeleteSelected && (
+        <div className="modal-overlay" id="confirm-bulk-modal">
+          <div className="modal-content confirm-modal-content">
+            <div className="confirm-modal-body">
+              <div className="confirm-icon">⚠</div>
+              <h3 style={{ marginBottom: '8px', color: 'var(--color-primary)' }}>¿Eliminar Estudiantes?</h3>
+              <p className="confirm-text">Se eliminarán permanentemente <strong>{selectedIds.length}</strong> estudiantes de la base de datos.</p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button className="btn btn-secondary" onClick={() => setConfirmDeleteSelected(false)}>
+                  Cancelar
+                </button>
+                <button className="btn btn-danger" onClick={handleDeleteSelectedConfirm}>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+ 
+       {/* Toast Notification Container */}
       <div className="toast-container" id="toast-container">
         {toasts.map((toast) => (
           <div key={toast.id} className={`toast toast-${toast.type}`}>
