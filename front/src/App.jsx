@@ -17,6 +17,51 @@ function App() {
   // Local search filter
   const [searchQuery, setSearchQuery] = useState('');
 
+  // CSV File upload ref & handlers
+  const fileInputRef = React.useRef(null);
+
+  const handleCsvUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      showToast('Por favor, cargue únicamente archivos con extensión .csv', 'danger');
+      e.target.value = '';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/items/loadFile', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'No fue posible procesar el archivo CSV.');
+      }
+
+      const result = await response.json();
+      showToast(`Carga de CSV finalizada. Se procesaron ${result.length} estudiantes.`, 'success');
+    } catch (error) {
+      console.error('Error al subir el CSV:', error);
+      showToast(error.message || 'Error al enviar el archivo CSV al servidor.', 'danger');
+    } finally {
+      e.target.value = '';
+      await fetchItems();
+    }
+  };
+
   // Helper to show modern status toasts
   const showToast = (message, type = 'success') => {
     const id = Date.now();
@@ -160,6 +205,30 @@ function App() {
         </div>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           <span style={{ fontSize: '0.875rem', opacity: 0.85 }}>Unidad 4</span>
+          
+          <button 
+            className="btn btn-secondary" 
+            onClick={handleCsvUploadClick} 
+            style={{ 
+              borderColor: 'var(--color-accent)', 
+              color: 'var(--color-accent)' 
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Cargar CSV
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".csv"
+            style={{ display: 'none' }}
+          />
+
           <button className="btn btn-accent" onClick={handleCreateOpen}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>

@@ -7,9 +7,17 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.msc.ftcunidad4.model.Item;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -79,5 +87,36 @@ public class FirebaseCrudService {
         }
         docRef.delete().get();
         return true;
+    }
+
+    public List<Item> loadFromCsv(MultipartFile file) throws IOException, ExecutionException, InterruptedException {
+        try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
+             CSVParser parser = CSVFormat.DEFAULT.builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .setTrim(true)
+                     .build()
+                     .parse(reader)) {
+            List<Item> createdItems = new ArrayList<>();
+
+            for (CSVRecord record : parser) {
+                Item item = new Item();
+                item.setId(record.get("id"));
+                item.setNombre(record.get("nombre"));
+                item.setApellido(record.get("apellido"));
+                item.setTelefono(record.get("telefono"));
+                item.setEdad(Integer.parseInt(record.get("edad")));
+                item.setCorreo(record.get("correo"));
+                item.setDireccion(record.get("direccion"));
+                item.setUniversidad(record.get("universidad"));
+                item.setSemestre(Integer.parseInt(record.get("semestre")));
+                item.setJornada(record.get("jornada"));
+                item.setSexo(record.get("sexo"));
+
+                createdItems.add(create(item));
+            }
+
+            return createdItems;
+        }
     }
 }

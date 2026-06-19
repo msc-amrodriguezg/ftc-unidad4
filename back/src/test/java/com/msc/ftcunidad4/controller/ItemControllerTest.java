@@ -10,11 +10,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -111,4 +113,37 @@ class ItemControllerTest {
             .andExpect(jsonPath("$.jornada").value("Virtual"))
             .andExpect(jsonPath("$.sexo").value("Masculino"));
     }
+
+            @Test
+            void shouldLoadItemsFromCsv() throws Exception {
+            Item created = new Item();
+            created.setId("1");
+            created.setNombre("Carlos Andrés");
+            created.setApellido("Martínez López");
+            created.setTelefono("3101234567");
+            created.setEdad(20);
+            created.setCorreo("carlos.martinez@gmail.com");
+            created.setDireccion("Calle 12 # 5-34, Bogotá");
+            created.setUniversidad("UNAD");
+            created.setSemestre(3);
+            created.setJornada("Virtual");
+            created.setSexo("Masculino");
+
+            Mockito.when(service.loadFromCsv(Mockito.any())).thenReturn(List.of(created));
+
+            MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "data.csv",
+                "text/csv",
+                ("id,nombre,apellido,telefono,edad,correo,direccion,universidad,semestre,jornada,sexo\n"
+                    + "1,Carlos Andrés,Martínez López,3101234567,20,carlos.martinez@gmail.com,\"Calle 12 # 5-34, Bogotá\",UNAD,3,Virtual,Masculino\n")
+                    .getBytes()
+            );
+
+            mockMvc.perform(multipart("/api/items/loadFile").file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$[0].id").value("1"))
+                .andExpect(jsonPath("$[0].nombre").value("Carlos Andrés"))
+                .andExpect(jsonPath("$[0].apellido").value("Martínez López"));
+            }
 }
