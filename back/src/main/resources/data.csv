@@ -1,0 +1,11 @@
+id,nombre,apellido,telefono,edad,correo,direccion,universidad,semestre,jornada,sexo
+1,Carlos Andrés,Martínez López,3101234567,20,carlos.martinez@gmail.com,"Calle 12 # 5-34, Bogotá",UNAD,3,Virtual,Masculino
+2,Laura Valentina,Gómez Herrera,3157654321,22,laura.gomez@hotmail.com,"Carrera 8 # 20-15, Medellín",Universidad de Antioquia,5,Nocturna,Femenino
+3,Juan David,Pérez Castillo,3209876543,25,juan.perez@outlook.com,"Avenida 30 # 45-67, Cali",Universidad del Valle,7,Diurna,Masculino
+4,Sofía Isabel,Ramírez Torres,3184561230,19,sofia.ramirez@gmail.com,"Calle 50 # 30-22, Barranquilla",Universidad del Norte,2,Diurna,Femenino
+5,Andrés Felipe,Vargas Mendoza,3001122334,27,andres.vargas@gmail.com,"Carrera 15 # 80-10, Bucaramanga",UIS,9,Nocturna,Masculino
+6,Mariana,Cárdenas Ruiz,3145678901,21,mariana.cardenas@yahoo.com,"Calle 7 # 12-45, Manizales",Universidad de Caldas,4,Mixta,Femenino
+7,Diego Alejandro,Moreno Silva,3112233445,23,diego.moreno@gmail.com,"Carrera 22 # 15-30, Pereira",UTP,6,Diurna,Masculino
+8,Valeria,Ospina Bermúdez,3169988776,20,valeria.ospina@gmail.com,"Calle 33 # 41-09, Ibagué",Universidad del Tolima,3,Virtual,Femenino
+9,Sebastián,Torres Aguirre,3055544332,24,sebastian.torres@outlook.com,"Carrera 5 # 60-18, Pasto",Universidad de Nariño,8,Nocturna,Masculino
+10,Daniela,Castro Quintero,3178765432,18,daniela.castro@gmail.com,"Calle 90 # 10-55, Cartagena",Universidad de Cartagena,1,Diurna,Femenino
