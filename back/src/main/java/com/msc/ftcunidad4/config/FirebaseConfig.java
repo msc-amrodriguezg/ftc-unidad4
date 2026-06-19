@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
@@ -25,14 +27,19 @@ public class FirebaseConfig {
             return FirebaseApp.getInstance();
         }
 
-        FirebaseOptions.Builder optionsBuilder = FirebaseOptions.builder();
-        if (StringUtils.hasText(serviceAccountPath)) {
-            optionsBuilder.setCredentials(GoogleCredentials.fromStream(new FileInputStream(serviceAccountPath)));
-        } else {
-            optionsBuilder.setCredentials(GoogleCredentials.getApplicationDefault());
+        InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream("firebase/service-account.json");
+        if (inputStream == null) {
+            throw new FileNotFoundException(
+                    "No se encontró firebase/service-account.json en el classpath"
+            );
         }
+        GoogleCredentials credentials = GoogleCredentials.fromStream(inputStream);
 
-        return FirebaseApp.initializeApp(optionsBuilder.build());
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(credentials)
+                .build();
+        return FirebaseApp.initializeApp(options);
     }
 
     @Bean
