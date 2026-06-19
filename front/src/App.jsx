@@ -3,7 +3,7 @@ import Spinner from './components/Spinner';
 import ItemTable from './components/ItemTable';
 import ItemModal from './components/ItemModal';
 
-const API_URL = import.meta.env.VITE_API_URL ?? '';
+const API_URL = 'https://ftcu4-h2ahcna3hrgye2fu.canadacentral-01.azurewebsites.net' ?? '';
 
 function App() {
   const [items, setItems] = useState([]);
