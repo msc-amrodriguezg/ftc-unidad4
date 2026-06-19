@@ -73,6 +73,7 @@ class ItemControllerTest {
     @Test
     void shouldCreateItem() throws Exception {
         Item request = new Item();
+        request.setId("1");
         request.setNombre("Carlos Andrés");
         request.setApellido("Martínez López");
         request.setTelefono("3101234567");
@@ -85,6 +86,7 @@ class ItemControllerTest {
         request.setSexo("Masculino");
 
         Item created = new Item();
+        created.setId("1");
         created.setNombre("Carlos Andrés");
         created.setApellido("Martínez López");
         created.setTelefono("3101234567");
@@ -102,6 +104,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value("1"))
             .andExpect(jsonPath("$.nombre").value("Carlos Andrés"))
             .andExpect(jsonPath("$.apellido").value("Martínez López"))
             .andExpect(jsonPath("$.telefono").value("3101234567"))
