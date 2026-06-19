@@ -34,6 +34,12 @@ jobs:
           mkdir -p back/src/main/resources/firebase
           printf '%s' "$FIREBASE_CREDENTIALS" > back/src/main/resources/firebase/service-account.json
 
+      - name: Verify Firebase file (debug)
+        run: |
+          cat back/src/main/resources/firebase/service-account.json | grep -o "BEGIN PRIVATE KEY" || echo "ERROR: Key not found"
+          # Verifica que los saltos de línea existan en la clave
+          cat back/src/main/resources/firebase/service-account.json | jq '.private_key' | head -c 200
+
       - name: Build with Maven
         working-directory: back
         run: mvn clean install
