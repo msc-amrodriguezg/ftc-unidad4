@@ -9,5 +9,11 @@
     ".css": "text/css",
     ".json": "application/json",
     ".svg": "image/svg+xml"
-  }
+  },
+  "routes": [
+    {
+      "route": "/api/*",
+      "rewrite": "https://ftcu4-h2ahcna3hrgye2fu.canadacentral-01.azurewebsites.net/api/*"
+    }
+  ]
 }
